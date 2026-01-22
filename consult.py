@@ -24,7 +24,6 @@ import asyncio
 import argparse
 import hashlib
 import json
-import os
 import re
 import sys
 import time
@@ -46,6 +45,7 @@ except ImportError:
 # Feedback storage location
 FEEDBACK_DIR = Path.home() / ".consult" / "feedback"
 FEEDBACK_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # ANSI color codes
 class Colors:
@@ -390,7 +390,7 @@ class SynthesisEngine:
 
         # Compare each pair of responses for conflicts
         for i, r1 in enumerate(self.responses):
-            for r2 in self.responses[i+1:]:
+            for r2 in self.responses[i + 1:]:
                 detected = self._find_conflicts_between(r1, r2)
                 conflicts.extend(detected)
 
@@ -864,9 +864,9 @@ class ConsoleUI:
         """Print the consultation header."""
         self.total = len(models)
 
-        print(f"\n{Colors.BOLD}{'='*70}{Colors.RESET}")
+        print(f"\n{Colors.BOLD}{'=' * 70}{Colors.RESET}")
         print(f"{Colors.BOLD}Multi-Model Domain Consultation{Colors.RESET}")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         print(f"\n{Colors.DIM}Question:{Colors.RESET} {question[:100]}{'...' if len(question) > 100 else ''}")
         print(f"\n{Colors.DIM}Models selected ({len(models)}):{Colors.RESET}")
 
@@ -879,7 +879,6 @@ class ConsoleUI:
     def on_model_start(self, name: str, config: dict):
         """Called when a model query starts."""
         self.pending_models.add(name)
-        color = config["color"]
         print(f"  {Colors.PENDING}○{Colors.RESET} {name} - {Colors.DIM}querying...{Colors.RESET}")
 
     def on_model_complete(self, result: ModelResponse):
@@ -898,7 +897,7 @@ class ConsoleUI:
             "timeout": f"{Colors.WARNING}○{Colors.RESET}",
         }.get(result.status, "?")
 
-        duration = f"{result.duration_ms/1000:.1f}s"
+        duration = f"{result.duration_ms / 1000:.1f}s"
         print(f"  {status_icon} {color}{result.model}{Colors.RESET} - {result.status} ({duration})")
 
     def print_response(self, result: ModelResponse, index: int):
@@ -907,11 +906,12 @@ class ConsoleUI:
         color = config.get("color", Colors.RESET)
         domain_label = result.domain.upper()
 
-        print(f"\n{Colors.BOLD}{'─'*70}{Colors.RESET}")
+        print(f"\n{Colors.BOLD}{'─' * 70}{Colors.RESET}")
         print(f"{color}[{domain_label}]{Colors.RESET} {Colors.BOLD}{result.model}{Colors.RESET}")
         print(f"{Colors.DIM}{config.get('description', '')}{Colors.RESET}")
-        print(f"{Colors.DIM}Weight: {result.weight:.0%} | Duration: {result.duration_ms/1000:.1f}s{Colors.RESET}")
-        print(f"{'─'*70}")
+        duration_s = result.duration_ms / 1000
+        print(f"{Colors.DIM}Weight: {result.weight:.0%} | Duration: {duration_s:.1f}s{Colors.RESET}")
+        print(f"{'─' * 70}")
 
         if result.status == "success" and result.response:
             # Truncate very long responses
@@ -929,11 +929,14 @@ class ConsoleUI:
         succeeded = sum(1 for r in results if r.status == "success")
         failed = sum(1 for r in results if r.status in ("error", "timeout"))
 
-        print(f"\n{Colors.BOLD}{'='*70}{Colors.RESET}")
+        print(f"\n{Colors.BOLD}{'=' * 70}{Colors.RESET}")
         print(f"{Colors.BOLD}Summary{Colors.RESET}")
-        print(f"{'='*70}")
-        print(f"  Total time: {total_time_ms/1000:.1f}s")
-        print(f"  Models: {Colors.SUCCESS}{succeeded} succeeded{Colors.RESET}, {Colors.ERROR if failed else Colors.DIM}{failed} failed{Colors.RESET}")
+        print(f"{'=' * 70}")
+        total_time_s = total_time_ms / 1000
+        print(f"  Total time: {total_time_s:.1f}s")
+        fail_color = Colors.ERROR if failed else Colors.DIM
+        print(f"  Models: {Colors.SUCCESS}{succeeded} succeeded{Colors.RESET}, "
+              f"{fail_color}{failed} failed{Colors.RESET}")
 
         if succeeded > 0:
             avg_weight = sum(r.weight for r in results if r.status == "success") / succeeded
@@ -943,12 +946,17 @@ class ConsoleUI:
 
     def print_synthesis(self, synthesis: SynthesisResult):
         """Print the aggregated synthesis results."""
-        print(f"\n{Colors.BOLD}{'='*70}{Colors.RESET}")
+        print(f"\n{Colors.BOLD}{'=' * 70}{Colors.RESET}")
         print(f"{Colors.META}▶ SYNTHESIS: Aggregated Insights{Colors.RESET}")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
 
         # Consensus score
-        consensus_color = Colors.SUCCESS if synthesis.consensus_score > 0.7 else Colors.WARNING if synthesis.consensus_score > 0.4 else Colors.ERROR
+        if synthesis.consensus_score > 0.7:
+            consensus_color = Colors.SUCCESS
+        elif synthesis.consensus_score > 0.4:
+            consensus_color = Colors.WARNING
+        else:
+            consensus_color = Colors.ERROR
         print(f"\n{Colors.BOLD}Consensus Score:{Colors.RESET} {consensus_color}{synthesis.consensus_score:.0%}{Colors.RESET}")
         print(f"{Colors.DIM}(Higher = more agreement across models){Colors.RESET}")
 
@@ -964,7 +972,9 @@ class ConsoleUI:
             for i, theme in enumerate(synthesis.themes[:5], 1):
                 conf_color = Colors.SUCCESS if theme.confidence > 0.5 else Colors.WARNING
                 print(f"\n  {i}. {theme.theme[:80]}...")
-                print(f"     {Colors.DIM}Confidence: {conf_color}{theme.confidence:.0%}{Colors.RESET} | Models: {', '.join(theme.supporting_models)}")
+                models_str = ', '.join(theme.supporting_models)
+                print(f"     {Colors.DIM}Confidence: {conf_color}{theme.confidence:.0%}"
+                      f"{Colors.RESET} | Models: {models_str}")
                 if theme.evidence:
                     print(f"     {Colors.DIM}Evidence: {theme.evidence[0][:100]}...{Colors.RESET}")
 
@@ -990,11 +1000,11 @@ class ConsoleUI:
                 print(f"\n  {i}. [{priority_color}{action.priority.upper()}{Colors.RESET}] {action.action[:100]}")
                 print(f"     {Colors.DIM}Source: {', '.join(action.source_models)} ({action.domain}){Colors.RESET}")
 
-        print(f"\n{'='*70}\n")
+        print(f"\n{'=' * 70}\n")
 
     def print_feedback_prompt(self, query_hash: str):
         """Print feedback collection prompt."""
-        print(f"{Colors.DIM}{'─'*70}{Colors.RESET}")
+        print(f"{Colors.DIM}{'─' * 70}{Colors.RESET}")
         print(f"{Colors.META}Feedback helps improve future consultations{Colors.RESET}")
         print(f"{Colors.DIM}Query ID: {query_hash}{Colors.RESET}")
         print(f"{Colors.DIM}To provide feedback, run:{Colors.RESET}")
@@ -1048,7 +1058,7 @@ async def consult(
     return sorted_results
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Multi-Model Domain Expert Consultation CLI with Synthesis & Feedback",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -1177,7 +1187,7 @@ Examples:
     return parser.parse_args()
 
 
-def list_models():
+def list_models() -> None:
     """Print all available models grouped by domain."""
     print(f"\n{Colors.BOLD}Available Models (19){Colors.RESET}\n")
 
@@ -1205,7 +1215,7 @@ def list_models():
         print()
 
 
-def handle_feedback(args):
+def handle_feedback(args: argparse.Namespace) -> None:
     """Handle feedback-related commands."""
     feedback = FeedbackCapture()
 
@@ -1232,17 +1242,18 @@ def handle_feedback(args):
     print(f"\n{Colors.DIM}Feedback stored at: {FEEDBACK_DIR}{Colors.RESET}")
 
 
-def show_stats():
+def show_stats() -> None:
     """Show model performance statistics."""
     feedback = FeedbackCapture()
     stats = feedback.get_model_stats()
 
     if not stats:
-        print(f"{Colors.WARNING}No model statistics yet. Use --helpful and --best-model flags after consultations.{Colors.RESET}")
+        print(f"{Colors.WARNING}No model statistics yet. "
+              f"Use --helpful and --best-model flags after consultations.{Colors.RESET}")
         return
 
     print(f"\n{Colors.BOLD}Model Performance Statistics{Colors.RESET}")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     # Sort by positive rate
     sorted_stats = sorted(
@@ -1264,13 +1275,13 @@ def show_stats():
         print()
 
 
-def show_patterns():
+def show_patterns() -> None:
     """Analyze and display feedback patterns."""
     feedback = FeedbackCapture()
     patterns = feedback.analyze_patterns()
 
     print(f"\n{Colors.BOLD}Feedback Pattern Analysis{Colors.RESET}")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     if "message" in patterns:
         print(f"{Colors.WARNING}{patterns['message']}{Colors.RESET}")
@@ -1296,7 +1307,7 @@ def show_patterns():
     print()
 
 
-def show_recent(n: int):
+def show_recent(n: int) -> None:
     """Show recent consultations."""
     feedback = FeedbackCapture()
     entries = feedback.get_recent_feedback(n)
@@ -1306,7 +1317,7 @@ def show_recent(n: int):
         return
 
     print(f"\n{Colors.BOLD}Recent Consultations ({len(entries)}){Colors.RESET}")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     for entry in reversed(entries):
         query_hash = entry.get("query_hash", "unknown")
@@ -1426,9 +1437,18 @@ async def main():
         if synthesis:
             output["synthesis"] = {
                 "consensus_score": synthesis.consensus_score,
-                "themes": [{"theme": t.theme, "confidence": t.confidence, "models": t.supporting_models} for t in synthesis.themes],
-                "conflicts": [{"topic": c.topic, "positions": c.positions} for c in synthesis.conflicts],
-                "actions": [{"action": a.action, "priority": a.priority, "models": a.source_models} for a in synthesis.action_items],
+                "themes": [
+                    {"theme": t.theme, "confidence": t.confidence, "models": t.supporting_models}
+                    for t in synthesis.themes
+                ],
+                "conflicts": [
+                    {"topic": c.topic, "positions": c.positions}
+                    for c in synthesis.conflicts
+                ],
+                "actions": [
+                    {"action": a.action, "priority": a.priority, "models": a.source_models}
+                    for a in synthesis.action_items
+                ],
             }
         print(json.dumps(output, indent=2))
         return
@@ -1436,9 +1456,9 @@ async def main():
     # Print individual responses (unless --no-responses with synthesis)
     if not (args.synthesize and args.no_responses):
         if ui:
-            print(f"\n{Colors.BOLD}{'='*70}{Colors.RESET}")
+            print(f"\n{Colors.BOLD}{'=' * 70}{Colors.RESET}")
             print(f"{Colors.BOLD}Responses (sorted by relevance weight){Colors.RESET}")
-            print(f"{'='*70}")
+            print(f"{'=' * 70}")
 
         for i, result in enumerate(results):
             if result.status == "success":

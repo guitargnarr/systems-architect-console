@@ -3,8 +3,6 @@ Systems Architect Console - Backend API
 Queries multiple Ollama models in parallel for holistic analysis
 """
 
-import asyncio
-import json
 import subprocess
 import time
 from typing import Optional
@@ -12,7 +10,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from concurrent.futures import ThreadPoolExecutor
-import threading
 
 app = FastAPI(
     title="Systems Architect Console API",
