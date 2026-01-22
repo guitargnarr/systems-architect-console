@@ -213,6 +213,85 @@ MODELS = {
         "description": "Translation",
         "color": Colors.UTILITY,
     },
+
+    # Chain-of-Thought Models (Structured Reasoning)
+    # Technical CoT
+    "cot-software-architect": {
+        "domain": "technical",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: Distributed systems, trade-offs, 5-step reasoning",
+        "color": Colors.TECHNICAL,
+    },
+    "cot-performance-engineer": {
+        "domain": "technical",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: SLOs, bottlenecks, optimization ROI",
+        "color": Colors.TECHNICAL,
+    },
+    "cot-api-designer": {
+        "domain": "technical",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: REST/GraphQL/gRPC, DX, versioning",
+        "color": Colors.TECHNICAL,
+    },
+
+    # Wealth CoT
+    "cot-passive-income-strategist": {
+        "domain": "wealth",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: Income streams, leverage, 90-day action plans",
+        "color": Colors.WEALTH,
+    },
+    "cot-real-estate-investor": {
+        "domain": "wealth",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: BRRRR, deal analysis, financing stack",
+        "color": Colors.WEALTH,
+    },
+    "cot-deal-structurer": {
+        "domain": "wealth",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: M&A, purchase price allocation, SBA loans",
+        "color": Colors.WEALTH,
+    },
+
+    # Tax/Legal CoT
+    "cot-business-tax-strategist": {
+        "domain": "tax",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: Entity comparison, S-Corp salary, retirement",
+        "color": Colors.TAX,
+    },
+    "cot-entity-structure-advisor": {
+        "domain": "tax",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: Holding companies, liability protection, state selection",
+        "color": Colors.TAX,
+    },
+
+    # Personal CoT
+    "cot-career-strategist": {
+        "domain": "personal",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: Skill stacking, market positioning, negotiation",
+        "color": Colors.PERSONAL,
+    },
+    "cot-productivity-engineer": {
+        "domain": "personal",
+        "weight": 0.20,
+        "timeout": 180,
+        "description": "CoT: Time systems, focus protection, habit design",
+        "color": Colors.PERSONAL,
+    },
 }
 
 # Domain keyword routing
@@ -226,6 +305,15 @@ DOMAIN_KEYWORDS = {
     "personal": ["skill", "career", "productivity", "time", "focus", "learning",
                  "mental model", "systems thinking"],
     "utility": ["translate", "spanish", "language"],
+}
+
+# CoT models by domain (for --cot flag)
+COT_MODELS = {
+    "technical": ["cot-software-architect", "cot-performance-engineer", "cot-api-designer"],
+    "wealth": ["cot-passive-income-strategist", "cot-real-estate-investor",
+               "cot-deal-structurer"],
+    "tax": ["cot-business-tax-strategist", "cot-entity-structure-advisor"],
+    "personal": ["cot-career-strategist", "cot-productivity-engineer"],
 }
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
@@ -771,13 +859,40 @@ def detect_domains(question: str) -> set[str]:
     return detected
 
 
-def select_models(domains: set[str], max_models: int = 6) -> dict:
-    """Select the most relevant models for the detected domains."""
+def select_models(
+    domains: set[str],
+    max_models: int = 6,
+    use_cot: bool = False
+) -> dict:
+    """Select the most relevant models for the detected domains.
+
+    Args:
+        domains: Set of domain names to query
+        max_models: Maximum number of models to return
+        use_cot: If True, prefer Chain-of-Thought models for deeper analysis
+    """
     selected = {}
 
-    for name, config in MODELS.items():
-        if config["domain"] in domains:
-            selected[name] = config
+    if use_cot:
+        # Prefer CoT models when available
+        for domain in domains:
+            if domain in COT_MODELS:
+                for model_name in COT_MODELS[domain]:
+                    if model_name in MODELS:
+                        selected[model_name] = MODELS[model_name]
+        # If no CoT models found for domains, fall back to regular models
+        if not selected:
+            for name, config in MODELS.items():
+                if config["domain"] in domains:
+                    selected[name] = config
+    else:
+        # Regular model selection (non-CoT)
+        for name, config in MODELS.items():
+            # Skip CoT models unless explicitly requested
+            if name.startswith("cot-"):
+                continue
+            if config["domain"] in domains:
+                selected[name] = config
 
     # Sort by weight and take top N
     sorted_models = sorted(selected.items(), key=lambda x: -x[1]["weight"])
@@ -1070,6 +1185,10 @@ Examples:
   # With synthesis (aggregated insights)
   python consult.py --synthesize "Complex question requiring synthesis"
 
+  # Chain-of-Thought models (structured reasoning)
+  python consult.py --cot "Design a microservices architecture for a fintech app"
+  python consult.py --cot --domains wealth "Analyze this real estate deal"
+
   # Domain-specific
   python consult.py --domains technical "Design patterns for parallel LLM queries"
   python consult.py --domains wealth,tax "Structuring a side business for tax efficiency"
@@ -1129,6 +1248,11 @@ Examples:
         "--no-responses",
         action="store_true",
         help="With --synthesize, only show synthesis (skip individual responses)"
+    )
+    parser.add_argument(
+        "--cot",
+        action="store_true",
+        help="Use Chain-of-Thought models (structured reasoning with detailed analysis)"
     )
 
     # Feedback options
@@ -1374,15 +1498,19 @@ async def main():
     question = args.question
 
     # Determine which models to query
+    use_cot = getattr(args, 'cot', False)
+
     if args.all:
         selected_models = MODELS
     elif args.domains:
         domains = set(d.strip() for d in args.domains.split(","))
-        selected_models = select_models(domains, args.max_models)
+        selected_models = select_models(domains, args.max_models, use_cot=use_cot)
     else:
         # Auto-detect domains from question
         detected_domains = detect_domains(question)
-        selected_models = select_models(detected_domains, args.max_models)
+        selected_models = select_models(
+            detected_domains, args.max_models, use_cot=use_cot
+        )
 
     if not selected_models:
         print(f"{Colors.ERROR}Error: No models selected{Colors.RESET}")
