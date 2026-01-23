@@ -13,8 +13,10 @@ from datetime import datetime
 from typing import Optional
 from contextlib import asynccontextmanager
 
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import create_engine, Column, String, Integer, DateTime, Text, Float
 from sqlalchemy.ext.declarative import declarative_base
@@ -333,6 +335,15 @@ def health_check():
         "service": "ibanista-lead-api",
         "timestamp": datetime.utcnow().isoformat()
     }
+
+
+@app.get("/admin", response_class=HTMLResponse)
+def admin_dashboard():
+    """Serve admin dashboard HTML"""
+    admin_path = Path(__file__).parent / "admin.html"
+    if admin_path.exists():
+        return admin_path.read_text()
+    return "<h1>Admin dashboard not found</h1>"
 
 
 @app.post("/api/leads/calculator", response_model=LeadResponse)
