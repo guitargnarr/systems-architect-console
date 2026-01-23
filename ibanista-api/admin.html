@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ibanista Lead Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { navy: '#32373c', dark: '#1a1d20' },
+                        accent: { 500: '#e9a235', 600: '#d4862a' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-brand-navy text-white p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Ibanista Lead Dashboard</h1>
+            <button onclick="refreshData()" class="bg-accent-500 hover:bg-accent-600 px-4 py-2 rounded text-sm">
+                Refresh
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">Total Leads</p>
+                <p id="stat-total" class="text-3xl font-bold text-brand-navy">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">Calculator</p>
+                <p id="stat-calculator" class="text-3xl font-bold text-blue-600">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">Quiz</p>
+                <p id="stat-quiz" class="text-3xl font-bold text-green-600">-</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <p class="text-gray-500 text-sm">Newsletter</p>
+                <p id="stat-newsletter" class="text-3xl font-bold text-purple-600">-</p>
+            </div>
+        </div>
+
+        <!-- Email Stats -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-lg font-semibold mb-4">Email Status</h2>
+            <div class="flex gap-8">
+                <div>
+                    <span class="text-green-600 font-bold text-2xl" id="emails-sent">-</span>
+                    <span class="text-gray-500 ml-2">Sent</span>
+                </div>
+                <div>
+                    <span class="text-yellow-600 font-bold text-2xl" id="emails-queued">-</span>
+                    <span class="text-gray-500 ml-2">Queued</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex gap-2 mb-4">
+            <button onclick="filterLeads('')" class="filter-btn px-4 py-2 rounded bg-brand-navy text-white" data-filter="">All</button>
+            <button onclick="filterLeads('calculator')" class="filter-btn px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" data-filter="calculator">Calculator</button>
+            <button onclick="filterLeads('quiz')" class="filter-btn px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" data-filter="quiz">Quiz</button>
+            <button onclick="filterLeads('newsletter')" class="filter-btn px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" data-filter="newsletter">Newsletter</button>
+        </div>
+
+        <!-- Leads Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    </tr>
+                </thead>
+                <tbody id="leads-table" class="divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Lead Detail Modal -->
+        <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Lead Details</h3>
+                        <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">&times;</button>
+                    </div>
+                    <div id="modal-content"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:8000'
+            : 'https://ibanista-api.onrender.com';
+
+        let currentFilter = '';
+
+        async function refreshData() {
+            await Promise.all([loadStats(), loadLeads()]);
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch(`${API_URL}/api/stats`);
+                const data = await res.json();
+
+                document.getElementById('stat-total').textContent = data.total_leads;
+                document.getElementById('stat-calculator').textContent = data.by_source.calculator;
+                document.getElementById('stat-quiz').textContent = data.by_source.quiz;
+                document.getElementById('stat-newsletter').textContent = data.by_source.newsletter;
+                document.getElementById('emails-sent').textContent = data.emails.sent;
+                document.getElementById('emails-queued').textContent = data.emails.queued;
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        }
+
+        async function loadLeads() {
+            try {
+                const url = currentFilter
+                    ? `${API_URL}/api/leads?source=${currentFilter}`
+                    : `${API_URL}/api/leads`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                const tbody = document.getElementById('leads-table');
+
+                if (data.leads.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No leads yet</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.leads.map(lead => {
+                    const sourceColors = {
+                        calculator: 'bg-blue-100 text-blue-800',
+                        quiz: 'bg-green-100 text-green-800',
+                        newsletter: 'bg-purple-100 text-purple-800'
+                    };
+
+                    let details = '-';
+                    if (lead.source === 'calculator' && lead.region) {
+                        details = `${lead.region} | £${lead.monthly_savings?.toFixed(0) || 0}/mo savings`;
+                    } else if (lead.source === 'quiz' && lead.top_regions) {
+                        details = lead.top_regions.slice(0, 2).map(r => r.name).join(', ');
+                    }
+
+                    const date = new Date(lead.created_at).toLocaleDateString('en-GB', {
+                        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    return `
+                        <tr class="hover:bg-gray-50 cursor-pointer" onclick="showLead(${lead.id})">
+                            <td class="px-6 py-4 text-sm text-gray-500">#${lead.id}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">${lead.email}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">${lead.name || '-'}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full ${sourceColors[lead.source]}">${lead.source}</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">${details}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">${date}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Failed to load leads:', e);
+                document.getElementById('leads-table').innerHTML = `
+                    <tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Failed to load leads. Is the API running?</td></tr>
+                `;
+            }
+        }
+
+        function filterLeads(source) {
+            currentFilter = source;
+
+            // Update button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === source) {
+                    btn.className = 'filter-btn px-4 py-2 rounded bg-brand-navy text-white';
+                } else {
+                    btn.className = 'filter-btn px-4 py-2 rounded bg-gray-200 hover:bg-gray-300';
+                }
+            });
+
+            loadLeads();
+        }
+
+        async function showLead(id) {
+            try {
+                const res = await fetch(`${API_URL}/api/leads/${id}`);
+                const lead = await res.json();
+
+                let content = `
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Email</p>
+                                <p class="font-medium">${lead.email}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Name</p>
+                                <p class="font-medium">${lead.name || '-'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Source</p>
+                                <p class="font-medium capitalize">${lead.source}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Created</p>
+                                <p class="font-medium">${new Date(lead.created_at).toLocaleString()}</p>
+                            </div>
+                        </div>
+                `;
+
+                if (lead.calculator_data && lead.calculator_data.region) {
+                    content += `
+                        <div class="border-t pt-4">
+                            <h4 class="font-medium mb-2">Calculator Data</h4>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>UK Rent: <span class="font-medium">£${lead.calculator_data.uk_rent}</span></div>
+                                <div>Region: <span class="font-medium">${lead.calculator_data.region}</span></div>
+                                <div>Household: <span class="font-medium">${lead.calculator_data.household_size} person(s)</span></div>
+                                <div>Move Type: <span class="font-medium">${lead.calculator_data.move_type}</span></div>
+                                <div class="col-span-2 text-green-600 font-medium">
+                                    Monthly Savings: £${lead.calculator_data.monthly_savings?.toFixed(0)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (lead.quiz_data && lead.quiz_data.top_regions) {
+                    content += `
+                        <div class="border-t pt-4">
+                            <h4 class="font-medium mb-2">Quiz Results</h4>
+                            <div class="space-y-2">
+                                ${lead.quiz_data.top_regions.map((r, i) => `
+                                    <div class="flex justify-between items-center">
+                                        <span>${i + 1}. ${r.name}</span>
+                                        <span class="text-green-600 font-medium">${r.score}% match</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (lead.emails_sent && lead.emails_sent.length > 0) {
+                    content += `
+                        <div class="border-t pt-4">
+                            <h4 class="font-medium mb-2">Emails</h4>
+                            <div class="space-y-2 text-sm">
+                                ${lead.emails_sent.map(e => {
+                                    const statusColor = e.status === 'sent' ? 'text-green-600' :
+                                                       e.status === 'queued' ? 'text-yellow-600' : 'text-red-600';
+                                    return `
+                                        <div class="flex justify-between items-center">
+                                            <span class="capitalize">${e.type.replace('_', ' ')}</span>
+                                            <span class="${statusColor} capitalize">${e.status}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                content += '</div>';
+
+                document.getElementById('modal-content').innerHTML = content;
+                document.getElementById('modal').classList.remove('hidden');
+                document.getElementById('modal').classList.add('flex');
+            } catch (e) {
+                console.error('Failed to load lead:', e);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').classList.remove('flex');
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Initial load
+        refreshData();
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshData, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+sqlalchemy
+pg8000
+pydantic[email]
+python-multipart

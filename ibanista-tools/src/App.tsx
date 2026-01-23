@@ -1,6 +1,24 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import type { Variants } from 'framer-motion';
+
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'https://ibanista-api.onrender.com';
+
+// API submission helper
+async function submitToAPI(endpoint: string, data: Record<string, unknown>): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('API submission failed:', error);
+    return false;
+  }
+}
 import {
   Calculator,
   MapPin,
@@ -466,6 +484,11 @@ function RelocationCalculator() {
     targetRegion: 'provence'
   });
   const [showResults, setShowResults] = useState(false);
+  const [showEmailCapture, setShowEmailCapture] = useState(false);
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const calculateCosts = () => {
     const household = parseInt(inputs.householdSize) || 2;
@@ -582,7 +605,10 @@ function RelocationCalculator() {
         </div>
 
         <button
-          onClick={() => setShowResults(true)}
+          onClick={() => {
+            setShowResults(true);
+            setShowEmailCapture(true);
+          }}
           className="btn-primary w-full text-base"
         >
           Calculate My Budget <ArrowRight className="w-5 h-5" />
@@ -664,6 +690,73 @@ function RelocationCalculator() {
                 </p>
               </motion.div>
 
+              {/* Email Capture */}
+              {showEmailCapture && !submitted && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="bg-accent-50 border border-accent-200 rounded-lg p-6 mb-6"
+                >
+                  <p className="font-semibold text-primary-800 mb-2">Save your results & get a personalised guide</p>
+                  <p className="text-primary-600 text-sm mb-4">
+                    Enter your details to receive your budget breakdown by email, plus our free UK-to-France relocation checklist.
+                  </p>
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    setIsSubmitting(true);
+                    const region = frenchRegions.find(r => r.id === inputs.targetRegion);
+                    await submitToAPI('/api/leads/calculator', {
+                      email,
+                      name: name || undefined,
+                      uk_rent: parseFloat(inputs.currentRent),
+                      region: region?.name || inputs.targetRegion,
+                      household_size: parseInt(inputs.householdSize),
+                      move_type: inputs.moveType,
+                      monthly_savings: results.rentSavings
+                    });
+                    setIsSubmitting(false);
+                    setSubmitted(true);
+                    setShowEmailCapture(false);
+                  }} className="space-y-3">
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your name (optional)"
+                      className="input-field"
+                    />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your@email.com"
+                      required
+                      className="input-field"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="btn-accent w-full"
+                    >
+                      {isSubmitting ? 'Sending...' : 'Email My Results'} <Mail className="w-4 h-4" />
+                    </button>
+                  </form>
+                </motion.div>
+              )}
+
+              {submitted && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-success-50 border border-success-200 rounded-lg p-6 mb-6 text-center"
+                >
+                  <CheckCircle className="w-10 h-10 text-success-600 mx-auto mb-3" />
+                  <p className="font-semibold text-success-800">Results sent!</p>
+                  <p className="text-success-700 text-sm">Check your inbox for your personalised budget breakdown.</p>
+                </motion.div>
+              )}
+
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -697,7 +790,9 @@ function RegionFinderQuiz() {
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAnswer = (answer: string) => {
     const newAnswers = [...answers, { questionId: quizQuestions[currentQuestion].id, answer }];
@@ -763,8 +858,30 @@ function RegionFinderQuiz() {
   const topMatches = showResults ? calculateMatches() : [];
   const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    const matches = calculateMatches();
+    const topRegions = matches.map(r => ({
+      name: r.name,
+      score: Math.round((r.matchScore / 50) * 100)
+    }));
+
+    const answersObj: Record<string, string> = {};
+    answers.forEach(a => {
+      const q = quizQuestions.find(q => q.id === a.questionId);
+      if (q) answersObj[q.question] = a.answer;
+    });
+
+    await submitToAPI('/api/leads/quiz', {
+      email,
+      name: name || undefined,
+      answers: answersObj,
+      top_regions: topRegions
+    });
+
+    setIsSubmitting(false);
     setEmailSubmitted(true);
   };
 
@@ -784,17 +901,24 @@ function RegionFinderQuiz() {
             <p className="text-primary-500 mb-6">
               Enter your email to see your personalised French region recommendations and receive our relocation guide.
             </p>
-            <form onSubmit={handleEmailSubmit} className="max-w-sm mx-auto">
+            <form onSubmit={handleEmailSubmit} className="max-w-sm mx-auto space-y-3">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name (optional)"
+                className="input-field"
+              />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="input-field mb-4"
+                className="input-field"
               />
-              <button type="submit" className="btn-accent w-full">
-                See My Results <ArrowRight className="w-5 h-5" />
+              <button type="submit" disabled={isSubmitting} className="btn-accent w-full">
+                {isSubmitting ? 'Loading...' : 'See My Results'} <ArrowRight className="w-5 h-5" />
               </button>
             </form>
             <p className="text-xs text-primary-400 mt-4">
@@ -994,9 +1118,13 @@ function RegionFinderQuiz() {
 function NewsletterSection() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    await submitToAPI('/api/leads/newsletter', { email });
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
@@ -1039,11 +1167,12 @@ function NewsletterSection() {
               />
               <motion.button
                 type="submit"
+                disabled={isSubmitting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="btn-accent px-8 py-4 shadow-lg"
+                className="btn-accent px-8 py-4 shadow-lg disabled:opacity-50"
               >
-                Subscribe <ArrowRight className="w-5 h-5" />
+                {isSubmitting ? 'Subscribing...' : 'Subscribe'} <ArrowRight className="w-5 h-5" />
               </motion.button>
             </form>
           ) : (
