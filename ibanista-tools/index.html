@@ -29,6 +29,86 @@
 
     <!-- Theme color -->
     <meta name="theme-color" content="#32373c" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://ibanista-tools.vercel.app/" />
+
+    <!-- Structured Data - Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Ibanista",
+      "url": "https://www.ibanista.com",
+      "logo": "https://ibanista-tools.vercel.app/favicon.png",
+      "description": "UK to France relocation specialists helping expats move smoothly",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+44-203-576-5117",
+        "contactType": "customer service",
+        "areaServed": ["GB", "FR"],
+        "availableLanguage": ["English", "French"]
+      },
+      "sameAs": [
+        "https://www.instagram.com/ibanista/",
+        "https://www.facebook.com/ibanistafr/",
+        "https://www.linkedin.com/company/ibanista/",
+        "https://www.youtube.com/@ibanista"
+      ]
+    }
+    </script>
+
+    <!-- Structured Data - FAQPage for tools -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How much does it cost to move from UK to France?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Moving costs from UK to France range from £900 for a studio/partial move to £2,000+ for a full household. Use our free calculator to get a personalized estimate based on your household size and destination region."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which region of France should I move to?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The best region depends on your lifestyle preferences, budget, and priorities. Take our free 5-question quiz to discover your top 3 matching French regions based on climate, culture, cost of living, and expat community size."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the cost of living cheaper in France than the UK?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, France is generally more affordable. Rent is 31.9% lower, transport is 36% cheaper, and utilities are 39.6% lower compared to the UK (2026 data). Our calculator shows your potential monthly savings."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data - WebApplication for calculator -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Ibanista Relocation Budget Calculator",
+      "url": "https://ibanista-tools.vercel.app/#tools",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "GBP"
+      },
+      "description": "Free calculator to estimate UK to France moving costs, monthly budget, and potential savings"
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1024,6 +1024,7 @@ function RegionFinderQuiz() {
                       src={region.image}
                       alt={region.name}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                   <div className="p-5 md:w-2/3">
@@ -1507,6 +1508,7 @@ function BlogSection() {
                   src={article.image}
                   alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
                 />
                 <span className="absolute top-4 left-4 bg-primary-700 text-white text-xs font-semibold px-3 py-1 rounded-full">
                   {article.category}
@@ -1624,7 +1626,7 @@ function App() {
               <span className="text-white font-bold text-lg">i</span>
             </div>
             <div>
-              <h1 className="font-semibold text-primary-800">Ibanista</h1>
+              <span className="font-semibold text-primary-800">Ibanista</span>
               <p className="text-xs text-primary-400">UK to France Relocation</p>
             </div>
           </a>

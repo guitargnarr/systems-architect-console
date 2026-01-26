@@ -1,0 +1,7 @@
+# Robots.txt for ibanista-tools.vercel.app
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://ibanista-tools.vercel.app/sitemap.xml
