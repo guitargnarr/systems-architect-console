@@ -43,7 +43,7 @@
     {\normalsize Prepared by: Matthew Scott}\\
     {\normalsize Prepared for: Benjamin Small, Ibanista}\\[0.5em]
     {\normalsize January 22, 2026}\\[0.3em]
-    {\small\textit{Updated: January 26, 2026 --- Phase 2 Email Backend Complete}}
+    {\small\textit{Updated: January 26, 2026 --- Phase 2b UI Enhancements Complete}}
 \end{center}
 
 \vspace{1em}
@@ -77,8 +77,9 @@ This analysis identifies \stat{five critical digital gaps} in Ibanista's current
 \midrule
 Phase 1: Interactive Tools & \delivered{COMPLETE} & 100\% \\
 Phase 1: Brand Integration & \delivered{COMPLETE} & 100\% \\
-Phase 2: Email Backend & \delivered{COMPLETE} & 100\% \\
-Phase 2: AI Chatbot & \pending{PENDING} & 0\% \\
+Phase 2a: Email Backend & \delivered{COMPLETE} & 100\% \\
+Phase 2b: UI Enhancements & \delivered{COMPLETE} & 100\% \\
+Phase 2c: AI Chatbot & \pending{PENDING} & 0\% \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -322,7 +323,8 @@ Cost Calculator & \delivered{Delivered} & \effort{2-3 days} & High & 1 \\
 Region Finder Quiz & \delivered{Delivered} & \effort{3-5 days} & High & 2 \\
 Email UI/Capture & \delivered{Delivered} & \effort{1 day} & Medium & --- \\
 Email Backend & \delivered{Delivered} & \effort{2 days} & High & 3 \\
-AI Chatbot & \pending{Pending} & \effort{1 week} & Medium & 4 \\
+UI Enhancements & \delivered{Delivered} & \effort{1 day} & High & 4 \\
+AI Chatbot & \pending{Pending} & \effort{1 week} & Medium & 5 \\
 \bottomrule
 \end{longtable}
 
@@ -360,7 +362,7 @@ AI Chatbot & \pending{Pending} & \effort{1 week} & Medium & 4 \\
     \item Custom favicon matching Ibanista branding
 \end{itemize}
 
-\subsection{Phase 2: Engagement Infrastructure (Week 3-4) --- \delivered{PARTIAL}}
+\subsection{Phase 2a: Email Backend (Week 3) --- \delivered{COMPLETE}}
 
 \textbf{Deliverable 3: Email Automation Backend} --- \delivered{DELIVERED}
 \begin{itemize}[leftmargin=*]
@@ -372,7 +374,26 @@ AI Chatbot & \pending{Pending} & \effort{1 week} & Medium & 4 \\
     \item \delivered{Status: Complete and tested}
 \end{itemize}
 
-\textbf{Deliverable 4: FAQ Chatbot}
+\subsection{Phase 2b: UI Enhancements (Week 3-4) --- \delivered{COMPLETE}}
+
+\textbf{Deliverable 4: Site Parity Features} --- \delivered{DELIVERED}
+
+Following a comprehensive audit comparing the prototype to ibanista.com, the following UI enhancements were implemented to achieve feature parity:
+
+\begin{itemize}[leftmargin=*]
+    \item \delivered{$\checkmark$} \textbf{Exit Intent Newsletter Popup}: Triggers on mouse leave (top of viewport) or after 30 seconds; includes phone mockup showing ``IBANISTA Weekly''; session storage prevents re-display; ``Read by 5,500+ future and current expats''
+    \item \delivered{$\checkmark$} \textbf{Full Navigation Dropdowns}: ``Why Ibanista'' dropdown (About Us, How We Help); ``Free Resources'' dropdown (Guides, Webinars, Articles, FAQs); direct links to Money Transfer, Long-Term Rentals, Power Hour
+    \item \delivered{$\checkmark$} \textbf{Mobile Hamburger Menu}: Animated menu icon; full-screen overlay with all navigation items; smooth open/close transitions
+    \item \delivered{$\checkmark$} \textbf{Blog Section}: ``The Latest on the Blog'' with 3 article cards; real article links to ibanista.com/blog; read time estimates; animated hover effects
+    \item \delivered{$\checkmark$} \textbf{Floating CTA Button}: ``Book Free Consultation'' with calendar icon; appears after 200px scroll; fixed position bottom-right; links to HubSpot booking
+    \item \delivered{$\checkmark$} \textbf{Trustpilot Badge}: Green ``Excellent'' badge matching real site styling; clickable link to Trustpilot profile
+    \item \delivered{$\checkmark$} \textbf{B-Corp Certification}: Added to trust stats section; mentioned in footer; ``B-Corp Certified'' badge
+    \item \delivered{$\checkmark$} \textbf{Social Links Expanded}: Added YouTube and Spotify (podcast) to footer; now matches all 5 platforms from real site
+\end{itemize}
+
+\subsection{Phase 2c: AI Chatbot (Week 5) --- \pending{PENDING}}
+
+\textbf{Deliverable 5: FAQ Chatbot}
 \begin{itemize}[leftmargin=*]
     \item Platform: Intercom, Drift, or custom GPT
     \item Training: 50+ UK-France relocation FAQs
@@ -390,13 +411,15 @@ Budget Calculator & 2-3 days & \textsterling2,000--4,000 & 30 days & \delivered{
 Region Finder Quiz & 3-5 days & \textsterling3,000--5,000 & 30 days & \delivered{Done} \\
 Brand Integration & 1 day & \textsterling1,000--2,000 & Immediate & \delivered{Done} \\
 Email Backend & 2 days & \textsterling2,000--3,000 & 60 days & \delivered{Done} \\
+UI Enhancements & 1 day & \textsterling1,500--2,500 & Immediate & \delivered{Done} \\
 FAQ Chatbot & 1 week & \textsterling4,000--6,000 & 90 days & \pending{Pending} \\
 \midrule
 \textbf{Phase 1 (Complete)} & 4-5 days & \textsterling6,000--11,000 & --- & \delivered{Done} \\
-\textbf{Phase 2: Email (Complete)} & 2 days & \textsterling2,000--3,000 & --- & \delivered{Done} \\
-\textbf{Phase 2: AI (Remaining)} & 1 week & \textsterling4,000--6,000 & --- & \pending{Pending} \\
+\textbf{Phase 2a: Email (Complete)} & 2 days & \textsterling2,000--3,000 & --- & \delivered{Done} \\
+\textbf{Phase 2b: UI (Complete)} & 1 day & \textsterling1,500--2,500 & --- & \delivered{Done} \\
+\textbf{Phase 2c: AI (Remaining)} & 1 week & \textsterling4,000--6,000 & --- & \pending{Pending} \\
 \midrule
-\textbf{Total} & 4-6 weeks & \textsterling12,000--20,000 & --- & --- \\
+\textbf{Total} & 4-6 weeks & \textsterling13,500--22,500 & --- & --- \\
 \bottomrule
 \end{tabular}
 
@@ -424,6 +447,18 @@ Admin Dashboard: \url{https://systems-architect-console.onrender.com/admin}
     \item \delivered{$\checkmark$} Framer Motion animations
 \end{itemize}
 
+\textbf{UI Enhancements (NEW):}
+\begin{itemize}[leftmargin=*]
+    \item \delivered{$\checkmark$} Exit intent newsletter popup with phone mockup
+    \item \delivered{$\checkmark$} Full navigation dropdowns matching ibanista.com
+    \item \delivered{$\checkmark$} Mobile hamburger menu with animations
+    \item \delivered{$\checkmark$} ``Latest on the Blog'' section with 3 article cards
+    \item \delivered{$\checkmark$} Floating ``Book Free Consultation'' CTA button
+    \item \delivered{$\checkmark$} Trustpilot badge with green ``Excellent'' styling
+    \item \delivered{$\checkmark$} B-Corp certification badge
+    \item \delivered{$\checkmark$} YouTube and Spotify social links added
+\end{itemize}
+
 \textbf{Backend Features (NEW):}
 \begin{itemize}[leftmargin=*]
     \item \delivered{$\checkmark$} FastAPI REST endpoints for lead capture
@@ -446,24 +481,10 @@ Admin Dashboard: \url{https://systems-architect-console.onrender.com/admin}
 \end{center}
 
 %==============================================================================
-\section{Remaining Work: Phase 2 Scope}
+\section{Remaining Work: Phase 2c Scope}
 %==============================================================================
 
 The following items remain to complete the full digital transformation:
-
-\subsection{Email Automation Backend (3-5 days)}
-
-\begin{tabular}{@{}lp{9cm}@{}}
-\toprule
-\textbf{Task} & \textbf{Description} \\
-\midrule
-Mailchimp Setup & Create account, configure audience, design templates \\
-API Integration & Connect quiz/calculator submissions to Mailchimp lists \\
-Welcome Sequence & 5-email series introducing Ibanista services \\
-Quiz Follow-up & Region-specific content based on quiz results \\
-Calculator Follow-up & Budget-tier specific nurture content \\
-\bottomrule
-\end{tabular}
 
 \subsection{AI Chatbot (1 week)}
 
@@ -494,21 +515,31 @@ Widget Integration & Embed chatbot on tools page and main site \\
 \section{Conclusion and Next Steps}
 %==============================================================================
 
-\textbf{Phase 1 is complete.} The prototype at \url{https://ibanista-tools.vercel.app} demonstrates a fully functional budget calculator and region finder quiz with Ibanista branding, ready for user testing and feedback.
+\textbf{Phases 1, 2a, and 2b are complete.} The prototype at \url{https://ibanista-tools.vercel.app} now includes:
+\begin{itemize}[leftmargin=*]
+    \item Fully functional budget calculator and region finder quiz
+    \item Complete email backend with admin dashboard
+    \item Full navigation matching ibanista.com structure
+    \item Exit intent newsletter popup for lead capture
+    \item Blog section with latest articles
+    \item Trustpilot badge, B-Corp certification, and expanded social links
+\end{itemize}
 
 \textbf{Competitive Position Improved:}
 \begin{itemize}[leftmargin=*]
     \item Now matches Relocately, William Russell, and Lift and Shift Global on calculator capability
     \item \stat{Ahead of all competitors} on personalized region recommendation (no UK-France specialist offers this)
     \item Brand-consistent design maintains Ibanista's professional aesthetic
+    \item \stat{Near feature parity} with main ibanista.com site UX
 \end{itemize}
 
 \textbf{Recommended Immediate Actions:}
 \begin{enumerate}[leftmargin=*]
     \item \stat{Review prototype} at \url{https://ibanista-tools.vercel.app}
-    \item \stat{Test on mobile} to verify responsive behavior
-    \item \stat{Provide feedback} on calculator logic and quiz questions
-    \item \stat{Decide on Phase 2 priorities}: Email automation vs. AI chatbot
+    \item \stat{Test exit intent popup} by moving mouse to top of viewport
+    \item \stat{Test navigation dropdowns} to verify links work correctly
+    \item \stat{Review admin dashboard} at \url{https://systems-architect-console.onrender.com/admin}
+    \item \stat{Decide on Phase 2c}: AI chatbot implementation
     \item \stat{Schedule integration discussion} for embedding on ibanista.com
 \end{enumerate}
 
