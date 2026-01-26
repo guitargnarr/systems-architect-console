@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 
@@ -44,6 +44,7 @@ import {
   TrendingDown,
   Calendar,
   ChevronRight,
+  ChevronDown,
   Star,
   Phone,
   Shield,
@@ -55,7 +56,13 @@ import {
   MessageCircle,
   Youtube,
   Music,
-  Award
+  Award,
+  X,
+  Smartphone,
+  BookOpen,
+  Video,
+  FileQuestion,
+  Menu
 } from 'lucide-react';
 
 // Types
@@ -276,6 +283,45 @@ const trustStats = [
   { value: 'FCA', label: 'Regulated Partners' },
   { value: 'B-Corp', label: 'Certified' }
 ];
+
+// Blog articles data
+const blogArticles = [
+  {
+    title: 'Complete Guide to French Visas for UK Citizens in 2026',
+    excerpt: 'Everything you need to know about visa requirements after Brexit, including long-stay visas and residency permits.',
+    image: 'https://images.unsplash.com/photo-1551279880-03041531948f?w=400&q=80',
+    category: 'Visas',
+    link: 'https://www.ibanista.com/blog/'
+  },
+  {
+    title: 'Opening a French Bank Account: Step-by-Step',
+    excerpt: 'Navigate the French banking system with our comprehensive guide to account types, documents needed, and top bank recommendations.',
+    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&q=80',
+    category: 'Finance',
+    link: 'https://www.ibanista.com/blog/'
+  },
+  {
+    title: 'Healthcare in France: What Expats Need to Know',
+    excerpt: 'Understanding the French healthcare system, registering for social security, and choosing supplementary insurance.',
+    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&q=80',
+    category: 'Healthcare',
+    link: 'https://www.ibanista.com/blog/'
+  }
+];
+
+// Navigation menu structure
+const navMenuItems = {
+  whyIbanista: [
+    { label: 'About Us', href: 'https://www.ibanista.com/about-us/', icon: Users },
+    { label: 'How We Help', href: 'https://www.ibanista.com/how-we-help/', icon: Heart }
+  ],
+  freeResources: [
+    { label: 'Guides & E-books', href: 'https://www.ibanista.com/our-guides-and-e-books/', icon: BookOpen },
+    { label: 'Webinars', href: 'https://www.ibanista.com/blog/webinars/', icon: Video },
+    { label: 'Articles', href: 'https://www.ibanista.com/blog/', icon: FileText },
+    { label: 'FAQs', href: 'https://www.ibanista.com/faqs-help-centre/', icon: FileQuestion }
+  ]
+};
 
 // Hero Section with parallax
 function HeroSection() {
@@ -1213,18 +1259,188 @@ function NewsletterSection() {
   );
 }
 
+// Exit Intent Newsletter Popup
+function ExitIntentPopup() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const hasShown = useRef(false);
+
+  useEffect(() => {
+    // Check if already dismissed in this session
+    if (sessionStorage.getItem('exitPopupDismissed')) {
+      return;
+    }
+
+    const handleMouseLeave = (e: MouseEvent) => {
+      // Only trigger when mouse leaves through top of viewport
+      if (e.clientY <= 0 && !hasShown.current) {
+        hasShown.current = true;
+        setIsVisible(true);
+      }
+    };
+
+    // Also show after 30 seconds on page
+    const timer = setTimeout(() => {
+      if (!hasShown.current && !sessionStorage.getItem('exitPopupDismissed')) {
+        hasShown.current = true;
+        setIsVisible(true);
+      }
+    }, 30000);
+
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    sessionStorage.setItem('exitPopupDismissed', 'true');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    await submitToAPI('/api/leads/newsletter', {
+      email,
+      name: firstName || undefined,
+      source: 'exit_popup'
+    });
+    setIsSubmitting(false);
+    setSubmitted(true);
+    setTimeout(() => {
+      handleClose();
+    }, 2000);
+  };
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={handleClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
+          >
+            {/* Close button */}
+            <button
+              onClick={handleClose}
+              className="absolute top-4 right-4 text-primary-400 hover:text-primary-600 transition-colors z-10"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="md:flex">
+              {/* Phone mockup side */}
+              <div className="hidden md:flex md:w-2/5 bg-gradient-to-br from-primary-600 to-primary-800 p-6 items-center justify-center">
+                <div className="relative">
+                  <div className="w-32 h-56 bg-primary-900 rounded-2xl p-1.5 shadow-xl">
+                    <div className="w-full h-full bg-white rounded-xl overflow-hidden flex flex-col">
+                      <div className="bg-primary-700 text-white text-[8px] p-2 text-center font-semibold">
+                        IBANISTA Weekly
+                      </div>
+                      <div className="p-2 flex-1">
+                        <div className="text-[6px] text-primary-800 font-semibold mb-1">This week:</div>
+                        <div className="space-y-1">
+                          <div className="h-1.5 bg-primary-100 rounded w-full"></div>
+                          <div className="h-1.5 bg-primary-100 rounded w-4/5"></div>
+                          <div className="h-1.5 bg-primary-100 rounded w-3/5"></div>
+                        </div>
+                        <div className="mt-2 text-[5px] text-primary-500">
+                          Visa updates, property tips, and expat stories...
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <Smartphone className="absolute -bottom-2 -right-2 w-8 h-8 text-accent-400" />
+                </div>
+              </div>
+
+              {/* Form side */}
+              <div className="p-8 md:w-3/5">
+                {!submitted ? (
+                  <>
+                    <h3 className="text-2xl font-bold text-primary-800 mb-2">
+                      Wait! Don't miss out
+                    </h3>
+                    <p className="text-primary-600 mb-6">
+                      Join <span className="font-semibold">5,500+ expats</span> getting weekly tips on moving to France.
+                      Free guides, visa updates, and insider advice.
+                    </p>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-primary-700 mb-1">First name</label>
+                        <input
+                          type="text"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          placeholder="Your first name"
+                          className="input-field"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-primary-700 mb-1">Email *</label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          required
+                          className="input-field"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="btn-accent w-full"
+                      >
+                        {isSubmitting ? 'Subscribing...' : 'Sign up!'}
+                        {!isSubmitting && <ArrowRight className="w-4 h-4" />}
+                      </button>
+                    </form>
+                    <p className="text-xs text-primary-400 mt-4 text-center">
+                      We respect your privacy. Unsubscribe anytime.
+                    </p>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-primary-800 mb-2">You're in!</h3>
+                    <p className="text-primary-600">Check your inbox for your welcome guide.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // Floating Consultation Button
 function FloatingCTA() {
   const [isVisible, setIsVisible] = useState(false);
 
-  // Show after scrolling down
-  useState(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setIsVisible(window.scrollY > 400);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  });
+  }, []);
 
   return (
     <AnimatePresence>
@@ -1249,18 +1465,160 @@ function FloatingCTA() {
   );
 }
 
+// Blog Section
+function BlogSection() {
+  return (
+    <section className="py-20 bg-white">
+      <div className="max-w-6xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-12"
+          variants={fadeInUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-primary-800 mb-4">
+            The Latest on the Blog
+          </h2>
+          <p className="text-primary-600 text-lg max-w-2xl mx-auto">
+            Expert guides, tips, and insights to help you plan your move to France.
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="grid md:grid-cols-3 gap-8"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
+          {blogArticles.map((article, index) => (
+            <motion.a
+              key={index}
+              href={article.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              variants={fadeInUp}
+              whileHover={{ y: -8, transition: { duration: 0.2 } }}
+              className="bg-white rounded-xl overflow-hidden shadow-soft hover:shadow-elevated transition-all group"
+            >
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-4 left-4 bg-primary-700 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  {article.category}
+                </span>
+              </div>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-primary-800 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
+                  {article.title}
+                </h3>
+                <p className="text-primary-500 text-sm line-clamp-3 mb-4">
+                  {article.excerpt}
+                </p>
+                <span className="text-accent-600 font-medium text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                  Read more <ChevronRight className="w-4 h-4" />
+                </span>
+              </div>
+            </motion.a>
+          ))}
+        </motion.div>
+
+        <motion.div
+          className="text-center mt-10"
+          variants={fadeInUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          <a
+            href="https://www.ibanista.com/blog/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-primary-700 hover:text-primary-800 font-semibold transition-colors"
+          >
+            View all articles <ExternalLink className="w-4 h-4" />
+          </a>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Dropdown Menu Component
+function NavDropdown({ label, items, isOpen, onToggle }: {
+  label: string;
+  items: { label: string; href: string; icon: React.ComponentType<{ className?: string }> }[];
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="relative">
+      <button
+        onClick={onToggle}
+        className="flex items-center gap-1 text-primary-600 hover:text-primary-800 font-medium text-sm transition-colors"
+      >
+        {label}
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-primary-100 overflow-hidden z-50"
+          >
+            {items.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <a
+                  key={idx}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-primary-50 transition-colors"
+                >
+                  <Icon className="w-4 h-4 text-primary-500" />
+                  <span className="text-primary-700 text-sm font-medium">{item.label}</span>
+                </a>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // Main App
 function App() {
   const [activeTab, setActiveTab] = useState<'calculator' | 'quiz'>('calculator');
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setOpenDropdown(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Exit Intent Popup */}
+      <ExitIntentPopup />
+
       {/* Floating CTA */}
       <FloatingCTA />
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-primary-100">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Logo */}
           <a href="#" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary-700 rounded flex items-center justify-center">
               <span className="text-white font-bold text-lg">i</span>
@@ -1270,6 +1628,48 @@ function App() {
               <p className="text-xs text-primary-400">UK to France Relocation</p>
             </div>
           </a>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
+            <NavDropdown
+              label="Why Ibanista"
+              items={navMenuItems.whyIbanista}
+              isOpen={openDropdown === 'whyIbanista'}
+              onToggle={() => setOpenDropdown(openDropdown === 'whyIbanista' ? null : 'whyIbanista')}
+            />
+            <a
+              href="https://www.ibanista.com/send-money-to-france/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:text-primary-800 font-medium text-sm transition-colors"
+            >
+              Money Transfer
+            </a>
+            <a
+              href="https://www.ibanista.com/find-long-term-rentals-in-france/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:text-primary-800 font-medium text-sm transition-colors"
+            >
+              Long-Term Rentals
+            </a>
+            <a
+              href="https://www.ibanista.com/moving-to-france-power-hour-11-strategy-session-with-ben-small/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:text-primary-800 font-medium text-sm transition-colors"
+            >
+              Power Hour
+            </a>
+            <NavDropdown
+              label="Free Resources"
+              items={navMenuItems.freeResources}
+              isOpen={openDropdown === 'freeResources'}
+              onToggle={() => setOpenDropdown(openDropdown === 'freeResources' ? null : 'freeResources')}
+            />
+          </nav>
+
+          {/* Right side */}
           <div className="flex items-center gap-4">
             <a
               href="tel:+442033765117"
@@ -1278,16 +1678,77 @@ function App() {
               <Phone className="w-4 h-4" />
               +44 203 376 5117
             </a>
-            <a
-              href="https://www.ibanista.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-600 hover:text-primary-800 font-medium flex items-center gap-1 text-sm"
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 text-primary-600 hover:text-primary-800"
             >
-              Visit Ibanista.com <ExternalLink className="w-4 h-4" />
-            </a>
+              <Menu className="w-6 h-6" />
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden border-t border-primary-100 bg-white"
+            >
+              <nav className="max-w-6xl mx-auto px-4 py-4 space-y-3">
+                <div className="pb-2 border-b border-primary-100">
+                  <p className="text-xs text-primary-400 uppercase tracking-wide mb-2">Why Ibanista</p>
+                  {navMenuItems.whyIbanista.map((item, idx) => {
+                    const Icon = item.icon;
+                    return (
+                      <a
+                        key={idx}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 py-2 text-primary-700 hover:text-primary-800"
+                      >
+                        <Icon className="w-4 h-4" />
+                        {item.label}
+                      </a>
+                    );
+                  })}
+                </div>
+                <a href="https://www.ibanista.com/send-money-to-france/" target="_blank" rel="noopener noreferrer" className="block py-2 text-primary-700 hover:text-primary-800 font-medium">Money Transfer</a>
+                <a href="https://www.ibanista.com/find-long-term-rentals-in-france/" target="_blank" rel="noopener noreferrer" className="block py-2 text-primary-700 hover:text-primary-800 font-medium">Long-Term Rentals</a>
+                <a href="https://www.ibanista.com/moving-to-france-power-hour-11-strategy-session-with-ben-small/" target="_blank" rel="noopener noreferrer" className="block py-2 text-primary-700 hover:text-primary-800 font-medium">Power Hour</a>
+                <div className="pt-2 border-t border-primary-100">
+                  <p className="text-xs text-primary-400 uppercase tracking-wide mb-2">Free Resources</p>
+                  {navMenuItems.freeResources.map((item, idx) => {
+                    const Icon = item.icon;
+                    return (
+                      <a
+                        key={idx}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 py-2 text-primary-700 hover:text-primary-800"
+                      >
+                        <Icon className="w-4 h-4" />
+                        {item.label}
+                      </a>
+                    );
+                  })}
+                </div>
+                <a
+                  href="tel:+442033765117"
+                  className="flex items-center gap-2 py-2 text-primary-700 font-medium"
+                >
+                  <Phone className="w-4 h-4" />
+                  +44 203 376 5117
+                </a>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Hero */}
@@ -1369,6 +1830,9 @@ function App() {
           </AnimatePresence>
         </div>
       </section>
+
+      {/* Blog Section */}
+      <BlogSection />
 
       {/* Newsletter Section */}
       <NewsletterSection />
