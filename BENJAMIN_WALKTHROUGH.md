@@ -60,11 +60,11 @@
 **Click "Calculate My Budget"**
 
 > "Instantly, they see:
-> - Moving costs: £1,800 one-time
-> - Monthly budget in France: €2,850
-> - **Monthly savings: €647** compared to UK
-> - **Annual savings: €7,764**
-> - Break-even on moving costs: 3 months
+> - One-time relocation cost: £2,600
+> - Monthly budget in France: €1,900
+> - **Monthly rent savings: €700** compared to UK
+> - **Annual savings: €15,312**
+> - Break-even on moving costs: 4 months
 >
 > This is the 'aha moment'—they can *see* the financial benefit. And to get these results emailed to them..."
 
