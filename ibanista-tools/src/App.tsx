@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import type { Variants } from 'framer-motion';
 
 // API Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'https://ibanista-api.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://systems-architect-console.onrender.com';
 
 // API submission helper
 async function submitToAPI(endpoint: string, data: Record<string, unknown>): Promise<boolean> {
