@@ -43,7 +43,7 @@
     {\normalsize Prepared by: Matthew Scott}\\
     {\normalsize Prepared for: Benjamin Small, Ibanista}\\[0.5em]
     {\normalsize January 22, 2026}\\[0.3em]
-    {\small\textit{Updated: January 22, 2026 --- Phase 1 Prototype Complete}}
+    {\small\textit{Updated: January 26, 2026 --- Phase 2 Email Backend Complete}}
 \end{center}
 
 \vspace{1em}
@@ -65,7 +65,7 @@ This analysis identifies \stat{five critical digital gaps} in Ibanista's current
     \item \delivered{Gap Addressed:} Interactive cost calculator---\textit{now live with budget estimation, savings projections, and break-even analysis}
     \item \delivered{Gap Addressed:} Personalized region recommendation tool---\textit{5-question lifestyle quiz with top 3 region matching}
     \item \gap{Gap Confirmed:} No conversational AI assistant---Expat AI and ChatGPT integrations are transforming competitor offerings
-    \item \pending{Partial:} Email capture UI built; backend automation pending Mailchimp/ConvertKit integration
+    \item \delivered{Gap Addressed:} Email capture with full backend---\textit{FastAPI backend with lead database, email templates, and admin dashboard}
     \item \opp{Opportunity:} First-mover advantage in UK-France corridor with integrated digital tools
 \end{itemize}
 
@@ -77,7 +77,7 @@ This analysis identifies \stat{five critical digital gaps} in Ibanista's current
 \midrule
 Phase 1: Interactive Tools & \delivered{COMPLETE} & 100\% \\
 Phase 1: Brand Integration & \delivered{COMPLETE} & 100\% \\
-Phase 2: Email Backend & \pending{PENDING} & 0\% \\
+Phase 2: Email Backend & \delivered{COMPLETE} & 100\% \\
 Phase 2: AI Chatbot & \pending{PENDING} & 0\% \\
 \bottomrule
 \end{tabular}
@@ -276,10 +276,10 @@ Expat AI platforms now provide instant support for visa queries, healthcare navi
 \toprule
 \textbf{Metric} & \textbf{Finding} \\
 \midrule
-Gap Status & \pending{PARTIAL (UI Complete, Backend Pending)} \\
+Gap Status & \delivered{DELIVERED} \\
 Industry Standard & Drip campaigns yield 4-10x engagement vs. manual \\
-Tools Available & Mailchimp (free tier), ConvertKit, Omnisend \\
-Implementation & Low-code, 1-2 week setup \\
+Tools Available & Custom FastAPI backend (deployed) \\
+Implementation & Complete with admin dashboard \\
 \bottomrule
 \end{tabular}
 
@@ -287,19 +287,27 @@ Implementation & Low-code, 1-2 week setup \\
 
 HubSpot and Mailchimp data confirm that drip email campaigns---automated sequences triggered by user actions---dramatically outperform manual newsletters. Education content series that ``transform subscribers from novices to experts'' are particularly effective for complex services like international relocation.
 
-\textbf{Delivered (Frontend):}
+\textbf{Features Delivered:}
 \begin{itemize}[leftmargin=*]
-    \item \delivered{$\checkmark$} Newsletter signup form with email validation
-    \item \delivered{$\checkmark$} Email gate on quiz results (lead capture)
-    \item \delivered{$\checkmark$} Success confirmation UI
+    \item \delivered{$\checkmark$} FastAPI backend with SQLite database
+    \item \delivered{$\checkmark$} Lead capture from all 3 forms (calculator, quiz, newsletter)
+    \item \delivered{$\checkmark$} Email templates: Welcome, Calculator follow-up, Quiz follow-up
+    \item \delivered{$\checkmark$} Admin dashboard with real-time stats and lead management
+    \item \delivered{$\checkmark$} Email queue system (SMTP-ready when configured)
+    \item \delivered{$\checkmark$} Source filtering (view leads by calculator/quiz/newsletter)
+    \item \delivered{$\checkmark$} Lead detail view with full submission data
 \end{itemize}
 
-\textbf{Pending (Backend Integration):}
+\textbf{Backend URLs:}
 \begin{itemize}[leftmargin=*]
-    \item Mailchimp or ConvertKit API connection
-    \item Welcome series (5 emails over 2 weeks)
+    \item API: \url{https://systems-architect-console.onrender.com}
+    \item Admin Dashboard: \url{https://systems-architect-console.onrender.com/admin}
+\end{itemize}
+
+\textbf{Optional Future Enhancements:}
+\begin{itemize}[leftmargin=*]
+    \item Mailchimp or ConvertKit sync for advanced automation
     \item Pre-move checklist drip (12 weeks before move)
-    \item Post-inquiry nurture (for unconverted leads)
     \item Visa timeline reminders (milestone-based)
 \end{itemize}
 
@@ -313,7 +321,7 @@ HubSpot and Mailchimp data confirm that drip email campaigns---automated sequenc
 Cost Calculator & \delivered{Delivered} & \effort{2-3 days} & High & 1 \\
 Region Finder Quiz & \delivered{Delivered} & \effort{3-5 days} & High & 2 \\
 Email UI/Capture & \delivered{Delivered} & \effort{1 day} & Medium & --- \\
-Email Backend & \pending{Pending} & \effort{3-5 days} & High & 3 \\
+Email Backend & \delivered{Delivered} & \effort{2 days} & High & 3 \\
 AI Chatbot & \pending{Pending} & \effort{1 week} & Medium & 4 \\
 \bottomrule
 \end{longtable}
@@ -352,14 +360,16 @@ AI Chatbot & \pending{Pending} & \effort{1 week} & Medium & 4 \\
     \item Custom favicon matching Ibanista branding
 \end{itemize}
 
-\subsection{Phase 2: Engagement Infrastructure (Week 3-4) --- \pending{PENDING}}
+\subsection{Phase 2: Engagement Infrastructure (Week 3-4) --- \delivered{PARTIAL}}
 
-\textbf{Deliverable 3: Email Automation Setup}
+\textbf{Deliverable 3: Email Automation Backend} --- \delivered{DELIVERED}
 \begin{itemize}[leftmargin=*]
-    \item Platform: Mailchimp or ConvertKit integration
-    \item Sequences: Welcome, nurture, milestone reminders
-    \item Triggers: Calculator completion, quiz results, contact form
-    \item \pending{Status: Frontend complete, backend integration required}
+    \item Platform: Custom FastAPI backend with SQLite database
+    \item Lead Capture: All 3 forms (calculator, quiz, newsletter) submit to API
+    \item Email Templates: Welcome, calculator follow-up, quiz follow-up (region-specific)
+    \item Admin Dashboard: Real-time stats, lead management, filtering by source
+    \item Deployment: Render.com (auto-deploy from GitHub)
+    \item \delivered{Status: Complete and tested}
 \end{itemize}
 
 \textbf{Deliverable 4: FAQ Chatbot}
@@ -379,11 +389,12 @@ AI Chatbot & \pending{Pending} & \effort{1 week} & Medium & 4 \\
 Budget Calculator & 2-3 days & \textsterling2,000--4,000 & 30 days & \delivered{Done} \\
 Region Finder Quiz & 3-5 days & \textsterling3,000--5,000 & 30 days & \delivered{Done} \\
 Brand Integration & 1 day & \textsterling1,000--2,000 & Immediate & \delivered{Done} \\
-Email Automation & 3-5 days & \textsterling2,000--3,000 & 60 days & \pending{Pending} \\
+Email Backend & 2 days & \textsterling2,000--3,000 & 60 days & \delivered{Done} \\
 FAQ Chatbot & 1 week & \textsterling4,000--6,000 & 90 days & \pending{Pending} \\
 \midrule
 \textbf{Phase 1 (Complete)} & 4-5 days & \textsterling6,000--11,000 & --- & \delivered{Done} \\
-\textbf{Phase 2 (Remaining)} & 2 weeks & \textsterling6,000--9,000 & --- & \pending{Pending} \\
+\textbf{Phase 2: Email (Complete)} & 2 days & \textsterling2,000--3,000 & --- & \delivered{Done} \\
+\textbf{Phase 2: AI (Remaining)} & 1 week & \textsterling4,000--6,000 & --- & \pending{Pending} \\
 \midrule
 \textbf{Total} & 4-6 weeks & \textsterling12,000--20,000 & --- & --- \\
 \bottomrule
@@ -397,31 +408,39 @@ A working prototype has been developed demonstrating all Phase 1 deliverables:
 
 \begin{center}
 \fbox{\parbox{0.85\textwidth}{
-\textbf{Live Prototype URL:}\\
-\url{https://ibanista-tools.vercel.app}
+\textbf{Live Prototype URLs:}\\
+Frontend: \url{https://ibanista-tools.vercel.app}\\
+Backend API: \url{https://systems-architect-console.onrender.com}\\
+Admin Dashboard: \url{https://systems-architect-console.onrender.com/admin}
 
-\textbf{Features Delivered:}
+\textbf{Frontend Features:}
 \begin{itemize}[leftmargin=*]
     \item \delivered{$\checkmark$} Interactive Relocation Budget Calculator
     \item \delivered{$\checkmark$} ``Find Your French Region'' 5-Question Quiz
     \item \delivered{$\checkmark$} Responsive design (mobile-optimized)
-    \item \delivered{$\checkmark$} Lead capture integration points (email gates)
+    \item \delivered{$\checkmark$} Lead capture on all forms (connected to backend)
     \item \delivered{$\checkmark$} Ibanista brand integration (colors, imagery, trust badges)
-    \item \delivered{$\checkmark$} Services section with links to ibanista.com
     \item \delivered{$\checkmark$} Newsletter signup section
-    \item \delivered{$\checkmark$} Full footer with contact information
     \item \delivered{$\checkmark$} Framer Motion animations
-    \item \delivered{$\checkmark$} OG image for social sharing (1200x630)
-    \item \delivered{$\checkmark$} Custom favicon and Apple touch icons
+\end{itemize}
+
+\textbf{Backend Features (NEW):}
+\begin{itemize}[leftmargin=*]
+    \item \delivered{$\checkmark$} FastAPI REST endpoints for lead capture
+    \item \delivered{$\checkmark$} SQLite database for lead storage
+    \item \delivered{$\checkmark$} 3 email templates (welcome, calculator, quiz follow-up)
+    \item \delivered{$\checkmark$} Admin dashboard with real-time statistics
+    \item \delivered{$\checkmark$} Lead filtering by source (calculator/quiz/newsletter)
+    \item \delivered{$\checkmark$} Email queue system (SMTP-ready)
+    \item \delivered{$\checkmark$} Auto-deploy from GitHub via Render
 \end{itemize}
 
 \textbf{Technical Stack:}
 \begin{itemize}[leftmargin=*]
-    \item React 18 + TypeScript
-    \item Tailwind CSS v3
-    \item Framer Motion animations
-    \item Vite build system
-    \item Vercel deployment (instant global CDN)
+    \item Frontend: React 18 + TypeScript + Tailwind CSS + Framer Motion
+    \item Backend: FastAPI + SQLAlchemy + Pydantic
+    \item Deployment: Vercel (frontend) + Render (backend)
+    \item Repository: \url{https://github.com/guitargnarr/systems-architect-console}
 \end{itemize}
 }}
 \end{center}
